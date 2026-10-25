@@ -189,8 +189,29 @@ def apply_fixups(relative_path: str, text: str) -> str:
     return text
 
 
+INCLUDE_LINE = re.compile(
+    r"(?im)^([ \t]*INCLUDE[ \t]+)([A-Za-z0-9_.\\/]+)([ \t]*(?:;.*)?)$"
+)
+CANONICAL_INCLUDES = {
+    "irvine32.inc": "Irvine32.inc",
+    "macros.inc": "Macros.inc",
+    "graphwin.inc": "GraphWin.inc",
+}
+
+
+def normalize_includes(text: str) -> str:
+    """Use the canonical filename case so JWasm on Linux finds the headers."""
+
+    def replace(match: re.Match[str]) -> str:
+        name = match.group(2)
+        return match.group(1) + CANONICAL_INCLUDES.get(name.lower(), name) + match.group(3)
+
+    return INCLUDE_LINE.sub(replace, text)
+
+
 def write_source(target: Path, text: str) -> None:
     relative = target.relative_to(OUTPUT).as_posix()
+    text = normalize_includes(text)
     target.write_text(apply_fixups(relative, text), encoding="utf-8", newline="\n")
 
 

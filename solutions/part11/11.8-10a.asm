@@ -8,7 +8,7 @@
 ; procedures from Irvine32.lib.
 
 INCLUDE Irvine32.inc
-INCLUDE macros.inc
+INCLUDE Macros.inc
 BUFFER_SIZE = 500
 
 .data

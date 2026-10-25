@@ -1,7 +1,7 @@
 ;12.7 - 2 - Display Floating - Point Binary
 
 include Irvine32.inc
-INCLUDE macros.inc
+INCLUDE Macros.inc
 
 ; .386
 ; .model flat, stdcall

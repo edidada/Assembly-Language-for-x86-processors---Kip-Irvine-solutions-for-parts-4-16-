@@ -1,7 +1,7 @@
 ;12.6.2 - 9
 
 include Irvine32.inc
-INCLUDE macros.inc
+INCLUDE Macros.inc
 
 ; .386
 ; .model flat, stdcall

@@ -1,0 +1,65 @@
+name: Build MASM solutions
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Assemble solutions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Regenerate sources and check they are committed
+        run: |
+          python3 scripts/convert_snippets.py
+          git diff --exit-code -- solutions
+
+      - name: Validate generated source tree
+        run: python3 scripts/validate_sources.py
+
+      - name: Build JWasm
+        run: |
+          curl -fsSL -o /tmp/jwasm.zip \
+            https://github.com/Baron-von-Riedesel/JWasm/releases/download/v2.20/JWasm_v220_win32.zip
+          unzip -q /tmp/jwasm.zip -d /tmp/jwasm-src
+          make -C /tmp/jwasm-src -f GccUnix.mak -j"$(nproc)"
+          echo "/tmp/jwasm-src/GccUnixR" >> "$GITHUB_PATH"
+
+      - name: Assemble every MASM source
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/obj
+          count=0
+          while IFS= read -r -d '' file; do
+            jwasm -nologo -c -Ithird_party/irvine -Fo"/tmp/obj/${count}.obj" "$file"
+            count=$((count + 1))
+          done < <(find solutions -type f -name '*.asm' -print0 | sort -z)
+          echo "Assembled ${count} MASM files."
+
+      - name: Syntax-check portable C++ sources
+        run: |
+          set -euo pipefail
+          count=0
+          while IFS= read -r -d '' file; do
+            # The remaining C++ files use MSVC's inline __asm blocks, which
+            # GCC on Linux cannot parse.  They are still validated as snippets.
+            if grep -q '__asm' "$file"; then
+              continue
+            fi
+            g++ -std=c++17 -fsyntax-only -include cstdio "$file"
+            count=$((count + 1))
+          done < <(find solutions -type f -name '*.cpp' -print0 | sort -z)
+          echo "Syntax-checked ${count} portable C++ files."

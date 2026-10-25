@@ -1,0 +1,11 @@
+* text=auto
+
+*.asm text eol=lf
+*.cpp text eol=lf
+*.inc text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+
+# The original snippets are archived byte-for-byte.
+*.txt -text

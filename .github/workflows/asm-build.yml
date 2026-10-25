@@ -32,9 +32,10 @@ jobs:
 
       - name: Build JWasm
         run: |
-          curl -fsSL -o /tmp/jwasm.zip \
-            https://github.com/Baron-von-Riedesel/JWasm/releases/download/v2.20/JWasm_v220_win32.zip
-          unzip -q /tmp/jwasm.zip -d /tmp/jwasm-src
+          curl -fsSL -o /tmp/jwasm.tar.gz \
+            https://github.com/Baron-von-Riedesel/JWasm/archive/refs/tags/v2.20.tar.gz
+          mkdir -p /tmp/jwasm-src
+          tar -xzf /tmp/jwasm.tar.gz -C /tmp/jwasm-src --strip-components=1
           make -C /tmp/jwasm-src -f GccUnix.mak -j"$(nproc)"
           echo "/tmp/jwasm-src/GccUnixR" >> "$GITHUB_PATH"
 

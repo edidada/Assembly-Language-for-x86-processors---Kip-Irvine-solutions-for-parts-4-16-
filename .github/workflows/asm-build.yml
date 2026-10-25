@@ -37,7 +37,7 @@ jobs:
           mkdir -p /tmp/jwasm-src
           tar -xzf /tmp/jwasm.tar.gz -C /tmp/jwasm-src --strip-components=1
           make -C /tmp/jwasm-src -f GccUnix.mak -j"$(nproc)"
-          echo "/tmp/jwasm-src/GccUnixR" >> "$GITHUB_PATH"
+          echo "/tmp/jwasm-src/build/GccUnixR" >> "$GITHUB_PATH"
 
       - name: Assemble every MASM source
         run: |
